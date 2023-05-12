@@ -12,8 +12,8 @@ export default class extends BaseSchema {
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
-      // table.timestamps(true, true)
-      // table.timestamps(true, true)
+      table.dateTime("created_at")
+      table.dateTime("updated_at")
     })
   }
 

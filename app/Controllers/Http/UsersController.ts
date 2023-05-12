@@ -12,15 +12,38 @@ export default class UsersController {
     const user = await User.create({
       name: body.name,
       email: body.email,
-      password: body.password
+      password: body.password,
     })
 
     console.log(user.$isPersisted)
     return user
   }
 
-  public async show({}: HttpContextContract) {}
-  public async update({}: HttpContextContract) {}
+  public async show({  }: HttpContextContract) {}
+  public async update({ request }: HttpContextContract) {
+    const userId = request.param('id')
+    const body = request.only(['name', 'email'])
+    const user = await User.findOrFail(userId)
+    return await user.merge(body).save()
+  }
 
-  public async destroy({}: HttpContextContract) {}
+  public async destroy({ request, response }: HttpContextContract) {
+    const userId = request.param('id');
+    try {
+      const user = await User.findOrFail(userId)
+      response.status(204)
+      await user.delete();
+      console.log(user.$isDeleted)
+    } catch (error) {
+      if (error.code === "E_ROW_NOT_FOUND"){
+        response.status(404).json({
+          message: `User with ID ${userId} doesn't exist.`
+        });
+      } else {
+        response.status(500).json({
+          message: `An error occurred while deleting the user.`
+        })
+      }
+    }
+  }
 }
